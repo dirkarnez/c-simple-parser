@@ -8,10 +8,9 @@ typedef struct {
     char *expression;
     int length;
     unsigned int pos;
-    unsigned int second_pos;
 } Parser;
 
-int parseExpression(Parser *parser);
+int parser_parse(Parser *parser);
 
 
 bool is_operator(char c) {
@@ -39,7 +38,7 @@ int parseFactor(Parser *parser) {
     int result;
     if (parser->expression[parser->pos] == '(') {
         parser->pos++; // skip '('
-        result = parseExpression(parser);
+        result = parser_parse(parser);
         parser->pos++; // skip ')'
     } else {
         result = parseNumber(parser);
@@ -74,13 +73,24 @@ void parser_next_pos(Parser *parser) {
     parser->pos++;
 }
 
+void parser_set_pos(Parser *parser, unsigned int new_pos) {
+    parser->pos = new_pos;
+}
+
 unsigned int parser_current_pos(Parser *parser) {
     return parser->pos;
 }
 
 
+char parser_get_char_at(Parser *parser, unsigned int at) {
+    return parser->expression[at];
+}
 
-int parseExpression(Parser *parser) {
+int parser_parse_number(Parser *parser) {
+    return 0;
+}
+
+int parser_parse(Parser *parser) {
     // int result = parseTerm(parser);
     for (
         unsigned int previous_pos = 0;
@@ -95,10 +105,32 @@ int parseExpression(Parser *parser) {
         }
 
         if (is_digit(current_char)) {
-            
-            int number = 0;
-            printf("%c", current_char);
+            unsigned int at = current_pos; 
+            int operand = 0;
+            char scanning = '\0';
+            for (; is_digit((scanning = parser_get_char_at(parser, at))); at++) {
+                operand = operand * 10 + (scanning - '0');
+        
+            }
+            printf("operand is %d\n", operand);
+            parser_set_pos(parser, at);
+        } else if (is_operator(current_char)) {
+            // unsigned int at = current_pos; 
+            // int operand = 0;
+            // for (; is_digit(parser_get_char_at(parser, at)); at++) {
+            //     operand = operand * 10 + (parser_get_char_at(parser, at) - '0');
+        
+            // }
+            // printf("operand is %d", operand);
+            // parser_set_pos(parser, at);
         }
+
+                   
+            // while (isdigit(c)) {
+                
+            //     c = expression[++i];
+            // }
+            // operandStack.push(operand);
     }
 
     // ->expression[parser->pos] == '+' || parser->expression[parser->pos] == '-')) {
@@ -116,8 +148,8 @@ int parseExpression(Parser *parser) {
 }
 
 int evaluate(char *expression) {
-    Parser parser = {expression, strlen(expression), 0, 0};
-    return parseExpression(&parser);
+    Parser parser = {expression, strlen(expression), 0};
+    return parser_parse(&parser);
 }
 
 int main() {
@@ -125,7 +157,7 @@ int main() {
     // printf("Enter an expression: ");
     // fgets(expression, sizeof(expression), stdin);
     // expression[strcspn(expression, "\n")] = 0; // remove newline character
-    int result = evaluate("3 + 5");
+    int result = evaluate("37 + 5");
     printf("Result: %d\n", result);
     return 0;
 }
